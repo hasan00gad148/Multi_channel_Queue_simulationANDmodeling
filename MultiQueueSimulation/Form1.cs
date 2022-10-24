@@ -98,7 +98,7 @@ namespace MultiQueueSimulation
             for (int i = 0; i < serversTD.Count; i++)
             {
                 Server s = new Server(serversTD[i]);
-                s.ID = i;
+                s.ID = i+1;
                 servers.Add(s);
             }
 

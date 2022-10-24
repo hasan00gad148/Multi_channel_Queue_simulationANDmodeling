@@ -115,26 +115,42 @@ namespace MultiQueueModels
             return ServersIndecies;
         }
 
-        private Server Findserver(int arrival, Enums.SelectionMethod StoppingCriteria)
+        private void UpdateQ(bool emp, int Interarrival, int prevDelay)
+        {
+
+            if (emp)
+                this.currentQ = 0;
+
+            else {
+                if (Interarrival < prevDelay)
+                    this.currentQ += 1;
+                else
+                    this.currentQ = 1;
+            }
+            this.maxQ = Math.Max(this.currentQ, this.maxQ);
+        }
+
+        private int Findserver(Enums.SelectionMethod StoppingCriteria ,int arrival, int Interarrival,int prevDelay)
         {
             List<int> ServersIndecies = new List<int>();
             int serverInd;
 
+            bool emp = false; 
             for (int i = 0; i < this.Servers.Count; ++i)
             {
+                
                 if (this.Servers[i].FinishTime <= arrival)
                 {
                     ServersIndecies.Add(i);
+                    emp = true;
                 }
-                if (this.currentQ > 0)
-                    --this.currentQ;
             }
-            if (ServersIndecies.Count == 0)
+            if (!emp)
             {
-                ServersIndecies = MinFinishTime(this.Servers);
-                ++this.currentQ;
-                this.maxQ = Math.Max(this.currentQ, this.maxQ);
+                ServersIndecies = MinFinishTime(this.Servers);                
             }
+
+            UpdateQ(emp, Interarrival, prevDelay);
 
             if (StoppingCriteria == Enums.SelectionMethod.HighestPriority)
             {
@@ -149,7 +165,7 @@ namespace MultiQueueModels
                 serverInd = LeastUtilizationMethod(ServersIndecies);
             }
 
-            return this.Servers[serverInd];
+            return serverInd;
         }
 
 
@@ -162,10 +178,12 @@ namespace MultiQueueModels
 
 
             int prevArrivalTime = 0;
-            Server s = Findserver(0, this.SelectionMethod);
+            int si = Findserver(this.SelectionMethod, 0, 0, 0);
+            Server s = this.Servers[si];
             SimulationCase sc = new SimulationCase(s, 1, this.rnd.Next(1, 101), 0, 0, 0);
-           
             sc.buildCase();
+            //SimulationCase sc = new SimulationCase(Servers[0], 1, 0, 0, 1, 2, 0, 2, 0, 0);
+
             this.SimulationTable.Add(sc);
 
             int clientCount = 1;
@@ -177,11 +195,14 @@ namespace MultiQueueModels
 
                 int InterArrivalTime = SetInterArrival(this.InterarrivalDistribution, RandomInterArrival);
                 int ArrivalTime = prevArrivalTime + InterArrivalTime;
-                Server sever= Findserver(ArrivalTime, this.SelectionMethod);
 
-                SimulationCase simCase = new SimulationCase(sever, RandomInterArrival, RandomServerTime, InterArrivalTime, ArrivalTime, clientCount);
+                int serverindex = Findserver(this.SelectionMethod, ArrivalTime, InterArrivalTime, SimulationTable.Last().TimeInQueue);
+                Server server = this.Servers[serverindex];
+
+                SimulationCase simCase = new SimulationCase(server, RandomInterArrival, RandomServerTime, InterArrivalTime, ArrivalTime, clientCount);
                 int fTime = simCase.buildCase();
 
+                //this.Servers[serverindex] = simCase.AssignedServer;
                 // stoping condition based on time
 
                 this.finishTime = Math.Max(fTime, this.finishTime);
@@ -199,17 +220,17 @@ namespace MultiQueueModels
             foreach (Server s in this.Servers)
             {
                 if (s.ClientsCount > 0)
-                    s.AverageServiceTime = s.TotalWorkingTime / s.ClientsCount;
+                    s.AverageServiceTime = Convert.ToDecimal(s.TotalWorkingTime) / s.ClientsCount;
                 else
                     s.AverageServiceTime = 0;
                 if (this.finishTime > 0)
-                    s.Utilization = s.TotalWorkingTime / this.finishTime;
+                    s.Utilization = Convert.ToDecimal(s.TotalWorkingTime) / this.finishTime;
                 else
                     s.Utilization = 0;
                 s.IdleProbability = 1 - s.Utilization;
             }
 
-            this.PerformanceMeasures.MaxQueueLength = this.maxQ;
+          
             int sumWatingTime = 0;
             int sumWatingCount = 0;
             foreach(Server s in this.Servers)
@@ -217,8 +238,9 @@ namespace MultiQueueModels
                 sumWatingTime += s.WatingTime;
                 sumWatingCount += s.ClientsWatingCount;
             }
-            this.PerformanceMeasures.AverageWaitingTime = sumWatingTime / clientCount;
-            this.PerformanceMeasures.WaitingProbability = sumWatingCount / clientCount;
+            this.PerformanceMeasures.AverageWaitingTime = Convert.ToDecimal(sumWatingTime) / clientCount;
+            this.PerformanceMeasures.WaitingProbability = Convert.ToDecimal(sumWatingCount) / clientCount;
+            this.PerformanceMeasures.MaxQueueLength = this.maxQ;
         }
 
     }

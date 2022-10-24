@@ -29,7 +29,32 @@ namespace MultiQueueModels
 
             this.CustomerNumber = CustomerNumber;
         }
-       
+
+
+
+        //tmp constractor
+        public SimulationCase(Server s, int RandomInterArrival, int InterArrivalTime, int ArrivalTime, int RandomService, int ServiceTime, int StartTime, int EndTime, int TimeInQueue, int CustomerNumber)
+        {
+            this.AssignedServer = s;
+
+            this.RandomInterArrival = RandomInterArrival;
+            this.ArrivalTime = ArrivalTime;
+            this.InterArrival = InterArrivalTime;  
+
+            this.RandomService = RandomService;
+            this.ServiceTime = ServiceTime;
+
+            this.StartTime = StartTime;
+            this.EndTime = EndTime;
+            this.TimeInQueue = TimeInQueue;
+
+            this.CustomerNumber = CustomerNumber;
+
+            this.AssignedServer.ClientsCount = 1;
+            this.AssignedServer.WatingTime += this.TimeInQueue;
+            this.AssignedServer.FinishTime = this.EndTime;
+        }
+        //-------------------------------------------------------------
 
         public int CustomerNumber { get; set; }
         public int RandomInterArrival { get; set; }
@@ -76,8 +101,8 @@ namespace MultiQueueModels
             if (this.AssignedServer.FinishTime > this.ArrivalTime)
             {
                 this.TimeInQueue = this.StartTime - this.ArrivalTime;
-                AssignedServer.ClientsWatingCount += 1;
-                AssignedServer.WatingTime += this.TimeInQueue;
+                this.AssignedServer.ClientsWatingCount += 1;
+                this.AssignedServer.WatingTime += this.TimeInQueue;
             }
             else
                 this.TimeInQueue = 0;
