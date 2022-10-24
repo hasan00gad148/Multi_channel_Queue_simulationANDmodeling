@@ -32,9 +32,8 @@ namespace MultiQueueModels
         // MAKE FUNCTION TO RUN THE SIMULATION
 
         public int finishTime;
-        public int maxQ;
-        public int currentQ;
         Random rnd ;
+
         private int SetInterArrival(List<TimeDistribution> arivalTD, int RandomInterArrival)
         {
 
@@ -115,22 +114,22 @@ namespace MultiQueueModels
             return ServersIndecies;
         }
 
-        private void UpdateQ(bool emp, int Interarrival, int prevDelay)
-        {
+        //private void UpdateQ(bool emp, int Interarrival, int prevDelay)
+        //{
 
-            if (emp)
-                this.currentQ = 0;
+        //    if (emp)
+        //        this.currentQ -= 1;
 
-            else {
-                if (Interarrival < prevDelay)
-                    this.currentQ += 1;
-                else
-                    this.currentQ = 1;
-            }
-            this.maxQ = Math.Max(this.currentQ, this.maxQ);
-        }
+        //    else {
+        //        if (Interarrival < prevDelay)
+        //            this.currentQ += 1;
+        //        else
+        //            this.currentQ = 1;
+        //    }
+        //    this.maxQ = Math.Max(this.currentQ, this.maxQ);
+        //}
 
-        private int Findserver(Enums.SelectionMethod StoppingCriteria ,int arrival, int Interarrival,int prevDelay)
+        private int Findserver(Enums.SelectionMethod StoppingCriteria ,int arrival)
         {
             List<int> ServersIndecies = new List<int>();
             int serverInd;
@@ -150,7 +149,7 @@ namespace MultiQueueModels
                 ServersIndecies = MinFinishTime(this.Servers);                
             }
 
-            UpdateQ(emp, Interarrival, prevDelay);
+            //UpdateQ(emp, Interarrival, prevDelay);
 
             if (StoppingCriteria == Enums.SelectionMethod.HighestPriority)
             {
@@ -173,12 +172,9 @@ namespace MultiQueueModels
         public int BuildSimulationTable()
         {
             this.finishTime = 0;
-            this.maxQ = -1000;
-            this.currentQ = 0;
-
 
             int prevArrivalTime = 0;
-            int si = Findserver(this.SelectionMethod, 0, 0, 0);
+            int si = Findserver(this.SelectionMethod, 0);
             Server s = this.Servers[si];
             SimulationCase sc = new SimulationCase(s, 1, this.rnd.Next(1, 101), 0, 0, 0);
             sc.buildCase();
@@ -196,7 +192,7 @@ namespace MultiQueueModels
                 int InterArrivalTime = SetInterArrival(this.InterarrivalDistribution, RandomInterArrival);
                 int ArrivalTime = prevArrivalTime + InterArrivalTime;
 
-                int serverindex = Findserver(this.SelectionMethod, ArrivalTime, InterArrivalTime, SimulationTable.Last().TimeInQueue);
+                int serverindex = Findserver(this.SelectionMethod, ArrivalTime);
                 Server server = this.Servers[serverindex];
 
                 SimulationCase simCase = new SimulationCase(server, RandomInterArrival, RandomServerTime, InterArrivalTime, ArrivalTime, clientCount);
@@ -216,7 +212,8 @@ namespace MultiQueueModels
 
         public void setPerformanceMeasures(int clientCount)
         {
-
+            int currentQ = 0;
+            int maxQ = -100;
             foreach (Server s in this.Servers)
             {
                 if (s.ClientsCount > 0)
@@ -240,7 +237,24 @@ namespace MultiQueueModels
             }
             this.PerformanceMeasures.AverageWaitingTime = Convert.ToDecimal(sumWatingTime) / clientCount;
             this.PerformanceMeasures.WaitingProbability = Convert.ToDecimal(sumWatingCount) / clientCount;
-            this.PerformanceMeasures.MaxQueueLength = this.maxQ;
+
+            //int previ = 0;
+            //for (int i = 1; i < this.SimulationTable.Count; ++i)
+            //{
+            //    if (this.SimulationTable[i].TimeInQueue > 0)
+            //        currentQ += 1;
+            //    else
+            //        currentQ = 0;
+
+            //    if (this.SimulationTable[i].ArrivalTime >= this.SimulationTable[previ].EndTime && this.SimulationTable[previ].TimeInQueue > 0)
+            //            currentQ -= 1;
+                    
+            //    maxQ = Math.Max(currentQ, maxQ);
+            //    previ = i;
+            //}
+
+
+            this.PerformanceMeasures.MaxQueueLength = maxQ;
         }
 
     }
