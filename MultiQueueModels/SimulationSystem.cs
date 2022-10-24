@@ -14,6 +14,7 @@ namespace MultiQueueModels
             this.InterarrivalDistribution = new List<TimeDistribution>();
             this.PerformanceMeasures = new PerformanceMeasures();
             this.SimulationTable = new List<SimulationCase>();
+            this.rnd = new Random();
         }
 
         ///////////// INPUTS ///////////// 
@@ -33,7 +34,7 @@ namespace MultiQueueModels
         public int finishTime;
         public int maxQ;
         public int currentQ;
-
+        Random rnd ;
         private int SetInterArrival(List<TimeDistribution> arivalTD, int RandomInterArrival)
         {
 
@@ -80,8 +81,8 @@ namespace MultiQueueModels
 
         private int RandomMethod(List<int> ServersIDs)
         {
-            Random rnd = new Random();
-            int RandomInterArrival = rnd.Next(1, ServersIDs.Count);
+            
+            int RandomInterArrival = this.rnd.Next(1, ServersIDs.Count);
 
             return ServersIDs[RandomInterArrival];
         }
@@ -159,22 +160,20 @@ namespace MultiQueueModels
             this.maxQ = -1000;
             this.currentQ = 0;
 
-            Random rndArraivalTime = new Random();
-            Random rndServerTime = new Random();
 
             int prevArrivalTime = 0;
             Server s = Findserver(0, this.SelectionMethod);
-            SimulationCase sc = new SimulationCase(s, 0, rndServerTime.Next(1, 101), 0, 0, 0);
+            SimulationCase sc = new SimulationCase(s, 1, this.rnd.Next(1, 101), 0, 0, 0);
            
             sc.buildCase();
             this.SimulationTable.Add(sc);
 
             int clientCount = 1;
-            while (clientCount <= this.StoppingNumber)
+            while (clientCount < this.StoppingNumber)
             {
                 
-                int RandomInterArrival = rndArraivalTime.Next(1, 100);
-                int RandomServerTime = rndServerTime.Next(1, 100);
+                int RandomInterArrival = this.rnd.Next(1, 101);
+                int RandomServerTime = this.rnd.Next(1, 101);
 
                 int InterArrivalTime = SetInterArrival(this.InterarrivalDistribution, RandomInterArrival);
                 int ArrivalTime = prevArrivalTime + InterArrivalTime;
