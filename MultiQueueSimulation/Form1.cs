@@ -140,7 +140,7 @@ namespace MultiQueueSimulation
             system.setPerformanceMeasures(count);
 
 
-            string result = TestingManager.Test(system, Constants.FileNames.TestCase2);
+            string result = TestingManager.Test(system, Constants.FileNames.TestCase1);
             MessageBox.Show(result);
             Form2 f2 = new Form2(system.SimulationTable);
             f2.Show();

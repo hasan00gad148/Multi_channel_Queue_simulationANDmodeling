@@ -245,14 +245,15 @@ namespace MultiQueueModels
         private void MaxQ()
         {
             List<int> arrivalT = new List<int>();
-            SortedSet<int> finish = new SortedSet<int>();
-
+            SortedList<int,int> finishT = new SortedList<int,int>();
+            
             for (int i = 0; i < this.SimulationTable.Count; ++i)
             {
                 arrivalT.Add(this.SimulationTable[i].ArrivalTime);
-                finish.Add(this.SimulationTable[i].StartTime);
+                finishT[i] = this.SimulationTable[i].StartTime;
+                //finish.Add(this.SimulationTable[i].StartTime);
             }
-            List<int> finishT = finish.ToList();
+            //List<int> finishT = finish.ToList();
 
 
             int currentQ = 0;
@@ -273,55 +274,27 @@ namespace MultiQueueModels
                 }
                 //maxQ = Math.Max(maxQ, currentQ);
 
-                while (arrivalT[j] > finishT[k])
+                while (arrivalT[j] >= finishT[k])
                 {
 
                     if (currentQ > 0)
                         currentQ -= 1;
+                    if (j == k)
+                        currentQ = 0;
 
-                    if (k < this.SimulationTable.Count - 1)
-                        ++k;
+                   if (k < this.SimulationTable.Count - 1)
+                        ++k;  
                     else
                         break;
 
                 }
-                //maxQ = Math.Max(maxQ, currentQ);
 
-                while (j < this.SimulationTable.Count - 1 && k < this.SimulationTable.Count - 1 && arrivalT[j] == finishT[k])
-                {
-
-                    if (j > k)
-                    {
-                        currentQ -= 1;
-                        if (k < this.SimulationTable.Count-1)
-                            ++k;
-                        else
-                            break;
-                    }
-                    else if (k > j)
-                    {
-                        currentQ += 1;
-                        maxQ = Math.Max(maxQ, currentQ);
-
-                        if (j < this.SimulationTable.Count-1)
-                            ++j;
-                        else
-                            break;
-
-                    }
-                    else
-                    {
-                        ++j;
-                        ++k;
-                    }
-
-                }
                 maxQ = Math.Max(maxQ, currentQ);
 
             }
 
 
-            this.PerformanceMeasures.MaxQueueLength = maxQ;
+            this.PerformanceMeasures.MaxQueueLength = maxQ-1;
         }
     }
 
