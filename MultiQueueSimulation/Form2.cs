@@ -26,14 +26,13 @@ namespace MultiQueueSimulation
 
         }
 
-
-        private void button1_Click(object sender, EventArgs e)
+        private void FillTable()
         {
-            for (int i = 0; i<dataGridView1.Columns.Count; ++i)
+            for (int i = 0; i < dataGridView1.Columns.Count; ++i)
             {
                 dataGridView1.Columns[i].DefaultCellStyle.ForeColor = Color.Black;
             }
-            
+
             foreach (SimulationCase sc in SimulationTable)
             {
                 DataGridViewRow row = (DataGridViewRow)this.dataGridView1.Rows[0].Clone();
@@ -54,7 +53,18 @@ namespace MultiQueueSimulation
 
                 this.dataGridView1.Rows.Add(row);
             }
+        }
+        private void button1_Click(object sender, EventArgs e)
+        {
 
+            if (dataGridView1.Rows.Count == 1)
+            {
+                FillTable();
+            }
+            else
+            {
+                MessageBox.Show("Table is Filled");
+            }
         }
 
     }

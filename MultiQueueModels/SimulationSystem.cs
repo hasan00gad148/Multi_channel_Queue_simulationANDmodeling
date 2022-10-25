@@ -210,9 +210,9 @@ namespace MultiQueueModels
         }
 
 
-        public void setPerformanceMeasures(int clientCount)
-        {
 
+        private void ServerMeasures()
+        {
             foreach (Server s in this.Servers)
             {
                 if (s.ClientsCount > 0)
@@ -226,22 +226,20 @@ namespace MultiQueueModels
                 s.IdleProbability = 1 - s.Utilization;
             }
 
-          
+        }
+
+        private void WatingMeasures(int clientCount)
+        {
             int sumWatingTime = 0;
             int sumWatingCount = 0;
-            foreach(Server s in this.Servers)
+            foreach (Server s in this.Servers)
             {
                 sumWatingTime += s.WatingTime;
                 sumWatingCount += s.ClientsWatingCount;
             }
             this.PerformanceMeasures.AverageWaitingTime = Convert.ToDecimal(sumWatingTime) / clientCount;
             this.PerformanceMeasures.WaitingProbability = Convert.ToDecimal(sumWatingCount) / clientCount;
-
-
-            MaxQ();
-
         }
-
         private void MaxQ()
         {
             List<int> arrivalT = new List<int>();
@@ -292,10 +290,23 @@ namespace MultiQueueModels
                 maxQ = Math.Max(maxQ, currentQ);
 
             }
-
-
             this.PerformanceMeasures.MaxQueueLength = maxQ-1;
         }
+
+
+
+
+        public void setPerformanceMeasures(int clientCount)
+        {
+            ServerMeasures();
+            WatingMeasures(clientCount);
+            MaxQ();
+        }
+
+
+
+
+
     }
 
 }
