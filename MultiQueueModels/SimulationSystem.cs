@@ -212,8 +212,7 @@ namespace MultiQueueModels
 
         public void setPerformanceMeasures(int clientCount)
         {
-            int currentQ = 0;
-            int maxQ = -100;
+
             foreach (Server s in this.Servers)
             {
                 if (s.ClientsCount > 0)
@@ -238,25 +237,92 @@ namespace MultiQueueModels
             this.PerformanceMeasures.AverageWaitingTime = Convert.ToDecimal(sumWatingTime) / clientCount;
             this.PerformanceMeasures.WaitingProbability = Convert.ToDecimal(sumWatingCount) / clientCount;
 
-            //int previ = 0;
-            //for (int i = 1; i < this.SimulationTable.Count; ++i)
-            //{
-            //    if (this.SimulationTable[i].TimeInQueue > 0)
-            //        currentQ += 1;
-            //    else
-            //        currentQ = 0;
 
-            //    if (this.SimulationTable[i].ArrivalTime >= this.SimulationTable[previ].EndTime && this.SimulationTable[previ].TimeInQueue > 0)
-            //            currentQ -= 1;
-                    
-            //    maxQ = Math.Max(currentQ, maxQ);
-            //    previ = i;
-            //}
+            MaxQ();
+
+        }
+
+        private void MaxQ()
+        {
+            List<int> arrivalT = new List<int>();
+            SortedSet<int> finish = new SortedSet<int>();
+
+            for (int i = 0; i < this.SimulationTable.Count; ++i)
+            {
+                arrivalT.Add(this.SimulationTable[i].ArrivalTime);
+                finish.Add(this.SimulationTable[i].StartTime);
+            }
+            List<int> finishT = finish.ToList();
+
+
+            int currentQ = 0;
+            int maxQ = -100;
+            int j = 0, k = 0;
+            while (j < this.SimulationTable.Count-1 && k < this.SimulationTable.Count-1)
+            {
+
+                while (arrivalT[j] < finishT[k])
+                {
+                    currentQ += 1;
+                    maxQ = Math.Max(maxQ, currentQ);
+
+                    if (j < this.SimulationTable.Count-1)
+                        ++j;
+                    else
+                        break;
+                }
+                //maxQ = Math.Max(maxQ, currentQ);
+
+                while (arrivalT[j] > finishT[k])
+                {
+
+                    if (currentQ > 0)
+                        currentQ -= 1;
+
+                    if (k < this.SimulationTable.Count - 1)
+                        ++k;
+                    else
+                        break;
+
+                }
+                //maxQ = Math.Max(maxQ, currentQ);
+
+                while (j < this.SimulationTable.Count - 1 && k < this.SimulationTable.Count - 1 && arrivalT[j] == finishT[k])
+                {
+
+                    if (j > k)
+                    {
+                        currentQ -= 1;
+                        if (k < this.SimulationTable.Count-1)
+                            ++k;
+                        else
+                            break;
+                    }
+                    else if (k > j)
+                    {
+                        currentQ += 1;
+                        maxQ = Math.Max(maxQ, currentQ);
+
+                        if (j < this.SimulationTable.Count-1)
+                            ++j;
+                        else
+                            break;
+
+                    }
+                    else
+                    {
+                        ++j;
+                        ++k;
+                    }
+
+                }
+                maxQ = Math.Max(maxQ, currentQ);
+
+            }
 
 
             this.PerformanceMeasures.MaxQueueLength = maxQ;
         }
-
     }
 
 }
